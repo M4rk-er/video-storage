@@ -16,6 +16,6 @@ class VideoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Video
         fields = ('id', 'filename')
-
+    
     def get_filename(self, video):
         return video.filename
