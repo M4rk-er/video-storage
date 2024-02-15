@@ -93,6 +93,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 VIDEOS_PATH = os.path.join('/videos')
+VIDEO_FILES_PATH = os.path.dirname(BASE_DIR)
 
 REDIS_HOST = '0.0.0.0'
 REDIS_PORT = '6379'

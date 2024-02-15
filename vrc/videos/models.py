@@ -10,10 +10,11 @@ class Video(models.Model):
         default=uuid.uuid4,
         editable=False,
     )
-    file = models.FileField(
-        upload_to='video_files/'
+    filepath = models.FileField(
+        upload_to='video_files/',
+        max_length=1024
     )
 
     @property
     def filename(self):
-        return os.path.basename(self.file.name)
+        return os.path.basename(self.filepath.name)
