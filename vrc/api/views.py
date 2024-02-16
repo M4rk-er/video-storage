@@ -1,12 +1,14 @@
-from rest_framework.viewsets import mixins, GenericViewSet
-from rest_framework.response import Response
 from rest_framework import status
-import os
+from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet, mixins
 
 from videos.models import Video
-from videos.utils import get_new_filename
-from .serializers import VideoCreateSerializer, VideoSerializer, VideoResolutionSerializer
 from videos.tasks import resolution_change_task
+from videos.utils import delete_file_if_exists, get_new_filename
+
+from .serializers import (VideoCreateSerializer,
+                          VideoResolutionSerializer,
+                          VideoSerializer,)
 
 
 class VideoViewset(mixins.CreateModelMixin,
@@ -32,7 +34,7 @@ class VideoViewset(mixins.CreateModelMixin,
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
- 
+
         try:
             video = Video.objects.create(**serializer.validated_data)
             video.save()
@@ -47,9 +49,15 @@ class VideoViewset(mixins.CreateModelMixin,
 
         video = self.get_object()
         try:
-            self.perform_destroy(video)
-            data = {'succsess': True}
-            return Response(data, status=status.HTTP_204_NO_CONTENT)
+
+            is_delete = delete_file_if_exists(video.filepath.path)
+            if is_delete:
+                self.perform_destroy(video)
+                data = {'succsess': True}
+                return Response(data, status=status.HTTP_204_NO_CONTENT)
+
+            data = {'error': 'Файл не существует'}
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
             data = {'error': e}
@@ -66,10 +74,12 @@ class VideoViewset(mixins.CreateModelMixin,
         new_filename = get_new_filename(video.filepath.path, width, height)
 
         try:
-            resolution_change_task.delay(video.pk, video.filepath.path, new_filename, width, height)
+            resolution_change_task.delay(
+                video.pk, video.filepath.path, new_filename, width, height
+            )
             data = {'succsess': True}
             return Response(data, status=status.HTTP_200_OK)
 
-        except Exception as e:
+        except Exception:
             data = {'succsess': False}
             return Response(data, status=status.HTTP_400_BAD_REQUEST)

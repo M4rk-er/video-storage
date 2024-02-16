@@ -1,5 +1,10 @@
-from pathlib import Path
 import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -17,6 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'drf_spectacular',
     'api',
     'videos',
 ]
@@ -78,6 +84,18 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Video storage',
+    'DESCRIPTION': 'Store video and change it resolution',
+    'VERSION': '1.0',
+    # 'SERVE_INCLUDE_SCHEMA': False,
+}
+
 
 LANGUAGE_CODE = 'en-us'
 
@@ -94,9 +112,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 VIDEOS_PATH = os.path.join('/videos')
 VIDEO_FILES_PATH = os.path.dirname(BASE_DIR)
+VALID_FILETYPES = ['.mp4', '.mov', '.avi']
 
-REDIS_HOST = '0.0.0.0'
-REDIS_PORT = '6379'
-CELERY_BROKER_URL = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
+REDIS_HOST = os.getenv('REDIS_HOST', '0.0.0.0')
+REDIS_PORT = os.getenv('REDIS_PORT', '6379')
+CELERY_BROKER_URL = 'redis://' + str(REDIS_HOST) + ':' + str(REDIS_PORT) + '/0'
 
 CELERY_RESULT_BACKEND = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'

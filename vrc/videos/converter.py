@@ -1,5 +1,6 @@
 import ffmpeg
 
+
 def change_video_resolution(file_path, new_filename, width, height):
     new_resolution = str(width) + 'x' + str(height)
 

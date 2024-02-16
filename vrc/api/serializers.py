@@ -2,13 +2,15 @@ from rest_framework import serializers
 
 from videos.models import Video
 from videos.utils import get_redis_statuses
-from .validators import validate_res_field
+
+from .validators import validate_file_type, validate_res_field
 
 
 class VideoCreateSerializer(serializers.ModelSerializer):
     file = serializers.FileField(required=True,
                                  write_only=True,
-                                 source='filepath')
+                                 source='filepath',
+                                 validators=[validate_file_type],)
 
     class Meta:
         model = Video
