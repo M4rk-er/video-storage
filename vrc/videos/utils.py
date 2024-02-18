@@ -1,3 +1,4 @@
+import logging
 import os
 
 import redis
@@ -5,6 +6,8 @@ import redis
 from vrc.settings import REDIS_HOST, REDIS_PORT, VIDEO_FILES_PATH
 
 from .models import Video
+
+logger = logging.getLogger(__name__)
 
 
 def get_redis_statuses(key, video_id):
@@ -16,19 +19,24 @@ def get_redis_statuses(key, video_id):
     return res
 
 
-def update_processing_and_status_in_redis(video_id, processing, status):
+def update_processing_and_status_in_redis(video_id, processing, status=None):
 
     processing_key = f'video:processing_status:{video_id}'
     status_key = f'video:last_processing_status:{video_id}'
     redis_client = redis.Redis(host=REDIS_HOST, port=int(REDIS_PORT))
     redis_client.set(processing_key, processing)
-    redis_client.set(status_key, status)
+    if status:
+        redis_client.set(status_key, status)
 
 
 def delete_file_if_exists(filepath):
+
     if os.path.exists(filepath):
         os.remove(filepath)
+        logger.info(f'файл - {filepath} удален')
         return True
+
+    logger.info(f'файл - {filepath} не найден')
     return False
 
 

@@ -93,9 +93,31 @@ SPECTACULAR_SETTINGS = {
     'TITLE': 'Video storage',
     'DESCRIPTION': 'Store video and change it resolution',
     'VERSION': '1.0',
-    # 'SERVE_INCLUDE_SCHEMA': False,
 }
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'log.log',
+        },
+    },
+    'loggers': {
+        'api': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propogate': True,
+        },
+        'videos': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propogate': True,
+        },
+    },
+}
 
 LANGUAGE_CODE = 'en-us'
 
@@ -110,12 +132,17 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+if os.getenv('DOCKERIZED'):
+    VIDEO_FILES_PATH = '/app'
+else:
+    VIDEO_FILES_PATH = os.path.dirname(BASE_DIR)
+
 VIDEOS_PATH = os.path.join('/videos')
-VIDEO_FILES_PATH = os.path.dirname(BASE_DIR)
+
 VALID_FILETYPES = ['.mp4', '.mov', '.avi']
 
-REDIS_HOST = os.getenv('REDIS_HOST', '0.0.0.0')
-REDIS_PORT = os.getenv('REDIS_PORT', '6379')
+REDIS_HOST = os.getenv('REDIS_HOST', 'redis')
+REDIS_PORT = os.getenv('REDIS_PORT', 6379)
 CELERY_BROKER_URL = 'redis://' + str(REDIS_HOST) + ':' + str(REDIS_PORT) + '/0'
 
-CELERY_RESULT_BACKEND = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
+CELERY_RESULT_BACKEND = 'redis://' + str(REDIS_HOST) + ':' + str(REDIS_PORT) + '/0'
