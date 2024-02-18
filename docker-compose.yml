@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+
+  db:
+    image: postgres:13.0-alpine
+    volumes:
+      - dbdata:/var/lib/postgresql/data/
+    restart: always
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./.env
+
+  redis:
+    image: redis:latest
+    hostname: redis
+    ports:
+      - "6379:6379"
+    depends_on:
+     - db
+    volumes:
+      - redisdata:/data
+
+  web:
+    build: ./vrc
+    restart: always
+    ports:
+     - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - video_files:/app/video_files
+
+    env_file:
+      - ./.env 
+
+  worker:
+    build: 
+      context: ./vrc
+      dockerfile: Dockerfile
+    entrypoint: celery
+    command: -A vrc worker -l warning
+    volumes:
+      - video_files:/app/video_files
+    links:
+      - redis
+    env_file:
+      - ./.env 
+    depends_on:
+      - redis
+      - web
+
+volumes:
+  dbdata:
+  redisdata:
+  video_files:
