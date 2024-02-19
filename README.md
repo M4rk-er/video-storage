@@ -1,4 +1,4 @@
-### Интрукция по развертованию проекта:
+### Инструкция по развертыванию проекта:
 
 - Клонировать репозиторий:
  ```
@@ -9,15 +9,15 @@
 ```
 docker-compose up -d --build
 ```
-- Создать и выполнить миграции:
+- Выполнить миграции:
 ```
-docker-compose exec web python manage.py makemigrations && python manage.py migrate
+docker-compose exec web python manage.py migrate
 ```
 Остановить контейнеры - ```docker-compose down -v```
 
 ### Реализовано:
  - API сервиса
- - Автодокументация API
+ - Автодокументация API - `http://127.0.0.1:8000/api/docs/`
  - Система логирования
  - Контейнеризация Docker
 
